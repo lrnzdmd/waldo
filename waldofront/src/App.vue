@@ -1,5 +1,5 @@
 <script setup>
-
+let isBoxVisible = false;
 async function normalizedClick(event) {
   const img = document.getElementById('image');
   const rect = img.getBoundingClientRect();
@@ -12,7 +12,8 @@ async function normalizedClick(event) {
 
   targetBox.style.left = `${clickX}px`; 
   targetBox.style.top = `${clickY}px`; 
-  targetBox.style.display = 'block'; 
+  isBoxVisible === false ? targetBox.style.display = 'block' : targetBox.style.display = 'none' ; 
+  isBoxVisible = !isBoxVisible;
   
   const absRect = {
     left: rect.left + window.scrollX,
@@ -31,7 +32,7 @@ async function normalizedClick(event) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
- 
+  
 
   
   document.addEventListener('click', normalizedClick)
