@@ -1,42 +1,41 @@
 <script setup>
-let isBoxVisible = false;
-async function normalizedClick(event) {
+import { ref, onMounted } from 'vue';
+
+const isBoxVisible = ref(false);
+const boxPosition = ref({ left: '0px', top: '0px' });
+const rightSide = ref(false);
+
+function normalizedClick(event) {
   const img = document.getElementById('image');
   const rect = img.getBoundingClientRect();
 
-  const targetBox = document.getElementById('targetBox');
 
-  const clickX = event.pageX;
-  const clickY = event.pageY;
-  
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
 
-  targetBox.style.left = `${clickX}px`; 
-  targetBox.style.top = `${clickY}px`; 
-  isBoxVisible === false ? targetBox.style.display = 'block' : targetBox.style.display = 'none' ; 
-  isBoxVisible = !isBoxVisible;
-  
-  const absRect = {
-    left: rect.left + window.scrollX,
-    top: rect.top + window.scrollY,
-    width: rect.width,
-    height: rect.height
+
+
+
+  boxPosition.value = {
+    left: `${clickX}px`,
+    top: `${clickY}px`
   };
-  
-  console.log('Absolute rectangle:', absRect);
-  
-  const normalizedX = (event.pageX - absRect.left) / absRect.width;
-  const normalizedY = (event.pageY - absRect.top) / absRect.height;
-  
+
+
+  isBoxVisible.value = !isBoxVisible.value;
+
+  const normalizedX = clickX / rect.width;
+  const normalizedY = clickY / rect.height;
+  normalizedX > 0.5 ? rightSide.value = false : rightSide.value = true;
+
   console.log('Normalized X:', normalizedX.toFixed(4));
   console.log('Normalized Y:', normalizedY.toFixed(4));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  
-
-  
-  document.addEventListener('click', normalizedClick)
-})
+onMounted(() => {
+  const img = document.getElementById('image');
+  img.addEventListener('click', normalizedClick);
+});
 </script>
 
 <template>
@@ -57,24 +56,27 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
   </header>
-  <div class="flex p-2 justify-center" >
-    <div id="targetBox" class="absolute hidden">
-    <div class="bg-white bg-opacity-70 border-dashed border-blue-700 border-4 aspect-square  " style="width: 4vw; transform: translate(-2.5vw, -2.5vw); "></div>
+  <div class="flex p-2 justify-center relative" >
+    <div :class="isBoxVisible ? 'block' : 'hidden'" id="targetBox" class="absolute" :style="{ left: boxPosition.left, top: boxPosition.top }">
+
+      <div class="bg-white bg-opacity-70 border-dashed border-blue-700 border-4 aspect-square lg:-translate-x-6 lg:-translate-y-6" :style="{ width: '4vw'}"></div>
     
-      <ul class="border-2 rounded-sm border-black bg-sky-200 w-full" style="transform: translateX(-5vw);">
-        <li class="flex items-center gap-2 p-2 hover:bg-sky-100 cursor-pointer">
+      <ul :class="rightSide ? 'right-side-class' : 'left-side-class'" class="border-2 rounded-sm border-black bg-sky-200 w-full ">
+        <li class="flex flex-wrap items-center gap-2 p-2 hover:bg-sky-100 cursor-pointer">
           <img class="w-3/12  rounded-sm border-2 border-black" src="@/assets/weedleicon.png" alt="weedle" draggable="false">
         <p class="font-semibold">Weedle</p>
         </li>
-        <li class="flex items-center gap-2 p-2 hover:bg-sky-100 cursor-pointer">
+        <li class="flex flex-wrap items-center gap-2 p-2 hover:bg-sky-100 cursor-pointer">
           <img class="w-3/12  rounded-sm border-2 border-black" src="@/assets/shelldericon.jpg" alt="shellder" draggable="false">
       <p class="font-semibold">Shellder</p>
         </li>
-        <li class="flex items-center gap-2 p-2 hover:bg-sky-100 cursor-pointer">
+        <li class="flex flex-wrap items-center gap-2 p-2 hover:bg-sky-100 cursor-pointer">
           <img class="w-3/12  rounded-sm border-2 border-black" src="@/assets/buttericon.jpg" alt="butterfree" draggable="false">
       <p class="font-semibold">Butterfree</p>
         </li>
       </ul>
+
+     
 
     
   </div>
@@ -83,3 +85,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 </template>
+
+<style scoped>
+.left-side-class {
+  transform: translateX(-100%);
+  right: 100%; /* Posiziona il menu sulla sinistra della box */
+}
+
+.right-side-class {
+  left: 100%; /* Posiziona il menu sulla destra della box */
+}
+</style>
